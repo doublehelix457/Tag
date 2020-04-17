@@ -1,0 +1,76 @@
+package com.doublehelix;
+
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.annotation.command.Command;
+import org.bukkit.plugin.java.annotation.command.Commands;
+import org.bukkit.plugin.java.annotation.permission.ChildPermission;
+import org.bukkit.plugin.java.annotation.permission.Permission;
+import org.bukkit.plugin.java.annotation.plugin.ApiVersion;
+import org.bukkit.plugin.java.annotation.plugin.Description;
+import org.bukkit.plugin.java.annotation.plugin.Plugin;
+import org.bukkit.plugin.java.annotation.plugin.author.Author;
+
+import java.util.logging.Logger;
+
+@Plugin(name="Tag", version="1.0-SNAPSHOT")
+@ApiVersion(ApiVersion.Target.v1_15)
+@Description("A Simple Game of Tag Plugin")
+@Author("doublehelix457")
+@Commands(@Command(name="tag", desc="main tag command", permission = "tag"))
+@Permission(name="tag", children={
+        @ChildPermission(name="tag.create"),
+        @ChildPermission(name="tag.start"),
+        @ChildPermission(name="tag.stop"),
+        @ChildPermission(name="tag.join"),
+        @ChildPermission(name="tag.leave"),
+        @ChildPermission(name="tag.kick"),
+        @ChildPermission(name="tag.setspawn")})
+@Permission(name="tag.sign", children={
+        @ChildPermission(name="tag.sign.create"),
+        @ChildPermission(name="tag.sign.use")
+})
+public class TagPlugin extends JavaPlugin {
+
+    private static TagPlugin inst;
+
+    Logger log;
+    FileConfiguration config = new YamlConfiguration();
+
+    public void onEnable()
+    {
+        inst = this;
+        getConfig().options().copyDefaults(true);
+        this.config = getConfig();
+        this.log = getLogger();
+        getCommand("tag").setExecutor(new TagCommand());
+        Bukkit.getPluginManager().registerEvents(new TagListener(), TagPlugin.inst());
+        this.log.info("[tag] tag plugin succesfully enabled!");
+        if(!config.getString("World").contains(Bukkit.getServer().getWorlds().get(0).getName())){
+            World defaultWorld = Bukkit.getServer().getWorlds().get(0);
+            config.set("World", Bukkit.getServer().getWorlds().get(0).getName());
+            config.set("x", defaultWorld.getSpawnLocation().getBlockX());
+            config.set("y", defaultWorld.getSpawnLocation().getBlockY());
+            config.set("z", defaultWorld.getSpawnLocation().getBlockZ());
+            saveConfig();
+        }else {
+            saveDefaultConfig();
+        }
+        if (!this.config.getBoolean("Enabled")) {
+            this.log.info("tag has been disabled in the config, it will not run.");
+        }
+    }
+
+    public void onDisable()
+    {
+        this.log.info("[tag] tag has been disabled :( Thanks for playing! See you next time!");
+    }
+
+    public static TagPlugin inst() {
+        return inst;
+    }
+}
