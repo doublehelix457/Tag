@@ -19,7 +19,6 @@ public class TagManager {
 
     public static boolean isGameRunning() { return gameRunning; }
     public static boolean doesGameExsist() { return gameCreated; }
-    public static Location getTagSpawn() { return spawn; }
     public static ArrayList<Player> getTaggers(){return taggers;}
     public static Player getIt(){return IT;}
     public static void setIt(Player p){IT=p;}
@@ -34,6 +33,7 @@ public class TagManager {
     }
 
     public static String startGame(){
+        gameRunning = true;
         if(taggers.size() < 2){
             return ChatColor.RED + "Not Enough Players in this game!";
         }
@@ -51,14 +51,14 @@ public class TagManager {
                 last_locations.put(IT, IT.getLocation());
             }
             IT.teleport(spawn);
-            TagUtil.sendMessageToPlayers(IT.getName() + "is on the hunt!");
+            TagUtil.sendMessageToPlayers(IT.getName() + " is on the hunt!");
         };
         Bukkit.getScheduler().runTaskLater(TagPlugin.inst(), delayTP, 6000);
         return null;
     }
 
     public static void endGame(){
-        TagUtil.sendTagMessageToAll(ChatColor.RED + "The game has ended! Thanks for playing!");
+        TagUtil.sendMessageToPlayers(ChatColor.RED + "The game has ended! Thanks for playing!");
         if(TagManager.doesGameExsist()){
             gameCreated = false;
         }
