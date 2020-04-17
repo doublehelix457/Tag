@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.annotation.command.Command;
 import org.bukkit.plugin.java.annotation.command.Commands;
@@ -21,7 +20,7 @@ import java.util.logging.Logger;
 @ApiVersion(ApiVersion.Target.v1_15)
 @Description("A Simple Game of Tag Plugin")
 @Author("doublehelix457")
-@Commands(@Command(name="tag", desc="main tag command", permission = "tag"))
+@Commands(@Command(name="tag", desc="main tag command"))
 @Permission(name="tag", children={
         @ChildPermission(name="tag.create"),
         @ChildPermission(name="tag.start"),
@@ -60,14 +59,11 @@ public class TagPlugin extends JavaPlugin {
         }else {
             saveDefaultConfig();
         }
-        if (!this.config.getBoolean("Enabled")) {
-            this.log.info("tag has been disabled in the config, it will not run.");
-        }
     }
 
     public void onDisable()
     {
-        this.log.info("[tag] tag has been disabled :( Thanks for playing! See you next time!");
+        this.log.info("[tag] Tag has been disabled!");
     }
 
     public static TagPlugin inst() {

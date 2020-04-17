@@ -5,6 +5,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -17,12 +18,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class TagListener implements Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerQuitEvent event)
     {
         if (TagManager.getTaggers().contains(event.getPlayer())) {
-            TagManager.getTaggers().remove(event.getPlayer());
-            event.setQuitMessage("Leaving in the middle of tag? LAME!");
             TagManager.quitter(event.getPlayer());
         }
     }
@@ -40,8 +39,7 @@ public class TagListener implements Listener {
                     TagManager.setIt(damaged);
                     event.setDamage(0);
                     event.setDamage(EntityDamageEvent.DamageModifier.BASE, 0);
-                    TagUtil.sendMessageToPlayers(ChatColor.GREEN + (event.getEntity()).getName() + " is it! " + (event.getDamager()).getName() + " is no longer it.");
-
+                    TagUtil.sendMessageToPlayers(ChatColor.GREEN + (event.getEntity()).getName() + " is it!");
                 } else {
                     event.setCancelled(true);
                     TagUtil.sendTagMessage(damager, ChatColor.RED + "This user is not part of the tag game!");
@@ -51,6 +49,10 @@ public class TagListener implements Listener {
                 event.setCancelled(true);
                 TagUtil.sendTagMessage(damager, ChatColor.RED + "You can't hit this user, they are in a game of tag!");
             } else {
+                if(!TagManager.isGameRunning() && TagManager.getTaggers().contains(damager)){
+                    TagUtil.sendTagMessage(damager, ChatColor.RED + "The game hasnt started yet!");
+                    return;
+                }
                     TagUtil.sendTagMessage(damager, ChatColor.RED + "You're not it, you can't tag someone!");
                     event.setDamage(0);
             }
@@ -119,6 +121,10 @@ public class TagListener implements Listener {
         if ((event.getClickedBlock() != null) && ((event.getClickedBlock().getState() instanceof Sign)) && (((Sign)event.getClickedBlock().getState()).getLine(0).equalsIgnoreCase("[join tag]"))) {
             if (event.getPlayer().hasPermission("tag.sign.use"))
             {
+                if(TagManager.getTaggers().contains(event.getPlayer())){
+                    TagUtil.sendTagMessage(event.getPlayer(), ChatColor.RED + "You are already in this game of tag!");
+                    return;
+                }
                 if (TagManager.doesGameExsist())
                 {
                     TagUtil.sendTagMessage(event.getPlayer(),"You have successfully joined the tag game." );

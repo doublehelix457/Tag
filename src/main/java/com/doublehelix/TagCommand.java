@@ -1,5 +1,6 @@
 package com.doublehelix;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -17,16 +18,13 @@ public class TagCommand implements CommandExecutor {
         {
             if (args.length == 0)
             {
-                TagUtil.sendTagMessage(player,ChatColor.BLUE + "You are running doublehelix457's tag version 1.0-SNAPSHOT.");
-                TagUtil.sendTagMessage(player,ChatColor.BLUE + "Usage of tag command: /tag <option>");
-                TagUtil.sendTagMessage(player,ChatColor.BLUE + "Options: join, leave");
-                TagUtil.sendTagMessage(player,ChatColor.BLUE + "Staff options: version, setlocation, start, stop, kick <player>");
+                TagUtil.sendTagMessage(player,ChatColor.GOLD + "You are running doublehelix457's tag version 1.0-SNAPSHOT.");
+                TagUtil.sendTagMessage(player,ChatColor.GOLD + "Usage of tag command: /tag <option>");
                 return true;
             }
             if(args[0].equalsIgnoreCase("create")){
                 if(sender.hasPermission("tag.create")) {
                     if (!TagManager.doesGameExsist() && !TagManager.isGameRunning()) {
-                        TagUtil.sendTagMessage(player, "");
                         TagManager.createGame(player);
                         return true;
                     } else {
@@ -59,6 +57,10 @@ public class TagCommand implements CommandExecutor {
             {
                 if (sender.hasPermission("tag.stop"))
                 {
+                    if(!TagManager.doesGameExsist() || !TagManager.isGameRunning()) {
+                        TagUtil.sendTagMessage(player, ChatColor.RED + "There is no running game to stop.");
+                        return true;
+                    }
                     TagManager.endGame();
                     return true;
                 }
@@ -69,10 +71,18 @@ public class TagCommand implements CommandExecutor {
             {
                 if (sender.hasPermission("tag.join"))
                 {
-
-                    TagUtil.sendTagMessage(player, ChatColor.RED + "You have successfully joined the tag game.");
-                    TagManager.addPlayerToGame(player);
-                    return true;
+                    if(!TagManager.doesGameExsist()) {
+                        TagUtil.sendTagMessage(player, ChatColor.RED + "There is no running game of tag. Ask a staff member to create a game.");
+                        return true;
+                    }
+                    if(!TagManager.getTaggers().contains(player)) {
+                        TagUtil.sendTagMessage(player, ChatColor.RED + "You have successfully joined the tag game.");
+                        TagManager.addPlayerToGame(player);
+                        return true;
+                    }else{
+                        TagUtil.sendTagMessage(player, ChatColor.RED + "You are already in this game of tag!");
+                        return true;
+                    }
                 }
                 TagUtil.sendTagMessage(player, ChatColor.RED + "You don't have permission to join the game!");
                 return true;
@@ -86,7 +96,7 @@ public class TagCommand implements CommandExecutor {
                         TagManager.quitter(player);
                         return true;
                     }
-                    TagUtil.sendTagMessage(player, ChatColor.RED + "You're not in a game of tag, silly!");
+                    TagUtil.sendTagMessage(player, ChatColor.RED + "You're not in a game of tag.");
                     return true;
                 }
                 TagUtil.sendTagMessage(player, ChatColor.RED + "You don't have permission to leave the game!");
@@ -94,7 +104,7 @@ public class TagCommand implements CommandExecutor {
             }
             if (args[0].equalsIgnoreCase("setspawn"))
             {
-                if (sender.hasPermission("tag.settaglocation"))
+                if (sender.hasPermission("tag.setspawn"))
                 {
                     Location loc = (player).getLocation();
                     TagUtil.setTagSpawn(loc);
@@ -108,17 +118,21 @@ public class TagCommand implements CommandExecutor {
             {
                 if (sender.hasPermission("tag.kick"))
                 {
+                    if(!TagManager.doesGameExsist() || !TagManager.isGameRunning()){
+                        TagUtil.sendTagMessage(player, ChatColor.RED + "There is no game of tag running!");
+                    }
                     if (args.length == 1)
                     {
-                        TagUtil.sendTagMessage(player, ChatColor.RED + "Please select a player to kick");
-                        TagUtil.sendTagMessage(player, ChatColor.BLUE + "Usage: /tag kick <player>");
-                        TagUtil.sendTagMessage(player, ChatColor.BLUE + "Kicks a player from the tag game.");
+                        TagUtil.sendTagMessage(player, ChatColor.GREEN + "Usage: /tag kick <player>");
                         return true;
                     }
-                    String playerto = args[1];
-                    Player kickee = TagUtil.getPlayerFromString(playerto);
+                    Player kickee = Bukkit.getServer().getPlayer(args[1]);
                     if (kickee != null)
                     {
+                        if(!TagManager.getTaggers().contains(kickee)){
+                            TagUtil.sendTagMessage(player,ChatColor.RED + "That player is not playing tag!");
+                            return true;
+                        }
                         TagManager.kickPlayer(kickee);
                         return true;
                     }
@@ -130,7 +144,7 @@ public class TagCommand implements CommandExecutor {
             }
             if (args[0].equalsIgnoreCase("version"))
             {
-                TagUtil.sendTagMessage(player, ChatColor.GOLD + "You are running Hotshot devs Tag Plugin Version 1.0");
+                TagUtil.sendTagMessage(player, ChatColor.GOLD + "Tag Version: 1.0-SNAPSHOT by doublehelix457");
                 return true;
             }
             return false;

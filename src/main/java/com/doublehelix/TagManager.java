@@ -25,18 +25,28 @@ public class TagManager {
     public static boolean isIt(Player tagger){return tagger == IT;}
 
     public static void createGame(Player creator){
+        if(gameCreated || gameRunning) {
+            TagUtil.sendTagMessage(creator, ChatColor.RED + "A Tag Lobby Already Exsists.");
+            return;
+        }
         host = creator;
         spawn = TagUtil.getTagSpawn();
         gameCreated = true;
-        host.sendMessage("Tag Lobby Started, get some players to join!");
         TagUtil.sendTagMessageToAll(host.getName() + " just started a game of Tag! Use /tag join or the join tag sign to play!");
+        TagUtil.sendTagMessage(host, "Tag Lobby Started, use a join sign or /tag join!");
     }
 
     public static String startGame(){
-        gameRunning = true;
+        if(!gameCreated){
+            return ChatColor.RED + "The game has not yet been created!";
+        }
+        if(gameRunning){
+            return ChatColor.RED + "The game has already started!";
+        }
         if(taggers.size() < 2){
             return ChatColor.RED + "Not Enough Players in this game!";
         }
+        gameRunning = true;
         IT = TagUtil.getRandomIt();
         for(Player p : taggers) {
             if(p != IT){
@@ -53,15 +63,12 @@ public class TagManager {
             IT.teleport(spawn);
             TagUtil.sendMessageToPlayers(IT.getName() + " is on the hunt!");
         };
-        Bukkit.getScheduler().runTaskLater(TagPlugin.inst(), delayTP, 6000);
+        Bukkit.getScheduler().runTaskLater(TagPlugin.inst(), delayTP, 100);
         return null;
     }
 
     public static void endGame(){
         TagUtil.sendMessageToPlayers(ChatColor.RED + "The game has ended! Thanks for playing!");
-        if(TagManager.doesGameExsist()){
-            gameCreated = false;
-        }
         if(TagManager.isGameRunning()) {
             for (Player p : taggers) {
                 p.teleport(last_locations.get(p));
@@ -71,12 +78,15 @@ public class TagManager {
         taggers.clear();
         IT = null;
         gameRunning = false;
+        gameCreated = false;
     }
 
     public static void kickPlayer(Player p){
         taggers.remove(p);
-        p.teleport(last_locations.get(p));
-        last_locations.remove(p);
+        if(last_locations.containsKey(p)) {
+            p.teleport(last_locations.get(p));
+            last_locations.remove(p);
+        }
         TagUtil.sendTagMessage(p, ChatColor.RED + "You have been kicked from the game.");
         if(taggers.size() < 2){
             endGame();
@@ -89,9 +99,14 @@ public class TagManager {
     }
 
     public static void quitter(Player p){
+        if(!taggers.contains(p)){
+            TagUtil.sendTagMessage(p, ChatColor.RED + "You are not in a game of tag that you can leave!");
+        }
         taggers.remove(p);
-        p.teleport(last_locations.get(p));
-        last_locations.remove(p);
+        if(last_locations.containsKey(p)) {
+            p.teleport(last_locations.get(p));
+            last_locations.remove(p);
+        }
         TagUtil.sendTagMessage(p, ChatColor.RED + "You have left the game.");
         if(taggers.size() < 2){
             endGame();
