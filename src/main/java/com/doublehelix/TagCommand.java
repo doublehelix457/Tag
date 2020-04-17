@@ -18,7 +18,7 @@ public class TagCommand implements CommandExecutor {
         {
             if (args.length == 0)
             {
-                TagUtil.sendTagMessage(player,ChatColor.GOLD + "You are running doublehelix457's tag version 1.0-SNAPSHOT.");
+                TagUtil.sendTagMessage(player,ChatColor.GOLD + "You are running doublehelix457's tag version 1.1-SNAPSHOT.");
                 TagUtil.sendTagMessage(player,ChatColor.GOLD + "Usage of tag command: /tag <option>");
                 return true;
             }
@@ -144,7 +144,7 @@ public class TagCommand implements CommandExecutor {
             }
             if (args[0].equalsIgnoreCase("version"))
             {
-                TagUtil.sendTagMessage(player, ChatColor.GOLD + "Tag Version: 1.0-SNAPSHOT by doublehelix457");
+                TagUtil.sendTagMessage(player, ChatColor.GOLD + "Tag Version: 1.1-SNAPSHOT by doublehelix457");
                 return true;
             }
             return false;

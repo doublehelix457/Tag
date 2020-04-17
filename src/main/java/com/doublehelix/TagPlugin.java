@@ -16,7 +16,7 @@ import org.bukkit.plugin.java.annotation.plugin.author.Author;
 
 import java.util.logging.Logger;
 
-@Plugin(name="Tag", version="1.0-SNAPSHOT")
+@Plugin(name="Tag", version="1.1-SNAPSHOT")
 @ApiVersion(ApiVersion.Target.v1_15)
 @Description("A Simple Game of Tag Plugin")
 @Author("doublehelix457")
