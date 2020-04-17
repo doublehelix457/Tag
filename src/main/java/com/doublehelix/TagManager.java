@@ -22,6 +22,7 @@ public class TagManager {
     public static Location getTagSpawn() { return spawn; }
     public static ArrayList<Player> getTaggers(){return taggers;}
     public static Player getIt(){return IT;}
+    public static void setIt(Player p){IT=p;}
     public static boolean isIt(Player tagger){return tagger == IT;}
 
     public static void createGame(Player creator){
@@ -44,7 +45,7 @@ public class TagManager {
             }
 
         }
-        TagUtil.sendMessageToPlayers(IT.getName() + "is it! You have 5 seconds. Start running!!!");
+        TagUtil.sendMessageToPlayers(IT.getName() + " is it! You have 5 seconds. Start running!!!");
         Runnable delayTP = () -> {
             synchronized (last_locations) {
                 last_locations.put(IT, IT.getLocation());
