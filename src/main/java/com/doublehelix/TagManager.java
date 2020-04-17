@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 
 public class TagManager {
     private static Map<Player, Location> last_locations = new HashMap();
