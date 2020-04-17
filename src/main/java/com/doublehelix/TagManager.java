@@ -27,9 +27,10 @@ public class TagManager {
 
     public static void createGame(Player creator){
         host = creator;
+        spawn = TagUtil.getTagSpawn();
         gameCreated = true;
         host.sendMessage("Tag Lobby Started, get some players to join!");
-        TagUtil.sendMessageToPlayers(host.getName() + " just started a game of Tag! Use /tag join or the join tag sign to play!");
+        TagUtil.sendTagMessageToAll(host.getName() + " just started a game of Tag! Use /tag join or the join tag sign to play!");
     }
 
     public static String startGame(){
