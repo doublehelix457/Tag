@@ -1,6 +1,7 @@
 package com.doublehelix;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -29,32 +31,70 @@ public class TagListener implements Listener {
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
     {
-        if ((event.getEntityType() == EntityType.PLAYER) && (event.getDamager().getType() == EntityType.PLAYER))
-        {
-            Player damaged = (Player)event.getEntity();
-            Player damager = (Player)event.getDamager();
+        if(TagManager.doesGameExsist()) {
+            if ((event.getEntityType() == EntityType.PLAYER) && (event.getDamager().getType() == EntityType.PLAYER)) {
+                Player damaged = (Player) event.getEntity();
+                Player damager = (Player) event.getDamager();
 
-            if(damager == TagManager.getIt()){
-                if(TagManager.getTaggers().contains(damaged)){
-                    TagManager.setIt(damaged);
-                    event.setDamage(0);
-                    event.setDamage(EntityDamageEvent.DamageModifier.BASE, 0);
-                    TagUtil.sendMessageToPlayers(ChatColor.GREEN + (event.getEntity()).getName() + " is it!");
-                } else {
+                if(damaged.getGameMode() != GameMode.SURVIVAL || damaged.getGameMode() != GameMode.ADVENTURE) return;
+
+                if (damager == TagManager.getIt()) {
+                    if (TagManager.getTaggers().contains(damaged)) {
+                        TagManager.setIt(damaged);
+                        event.setDamage(0);
+                        event.setDamage(EntityDamageEvent.DamageModifier.BASE, 0);
+                        TagUtil.sendMessageToPlayers(ChatColor.GREEN + (event.getEntity()).getName() + " is it!");
+                    } else {
+                        event.setCancelled(true);
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "This user is not part of the tag game!");
+                    }
+                } else if (TagManager.getTaggers().contains(damager) && !TagManager.getTaggers().contains(damaged)) {
                     event.setCancelled(true);
-                    TagUtil.sendTagMessage(damager, ChatColor.RED + "This user is not part of the tag game!");
+                    TagUtil.sendTagMessage(damager, ChatColor.RED + "You can't hit this user, they are in a game of tag!");
+                } else {
+                    if (!TagManager.isGameRunning() && TagManager.getTaggers().contains(damager)) {
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "The game hasnt started yet!");
+                        return;
+                    }
+                    if(TagManager.getTaggers().contains(damager)) {
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "You're not it, you can't tag someone!");
+                        event.setDamage(0);
+                    }
                 }
             }
-            else if(TagManager.getTaggers().contains(damager) && !TagManager.getTaggers().contains(damaged)) {
-                event.setCancelled(true);
-                TagUtil.sendTagMessage(damager, ChatColor.RED + "You can't hit this user, they are in a game of tag!");
-            } else {
-                if(!TagManager.isGameRunning() && TagManager.getTaggers().contains(damager)){
-                    TagUtil.sendTagMessage(damager, ChatColor.RED + "The game hasnt started yet!");
-                    return;
+        }
+    }
+
+    @EventHandler
+    public void entityInteract(PlayerInteractEntityEvent event){
+        if(TagManager.doesGameExsist()) {
+            if ((event.getRightClicked().getType() == EntityType.PLAYER)) {
+                Player damaged = (Player) event.getRightClicked();
+                Player damager = event.getPlayer();
+
+                if(damager.getGameMode() != GameMode.CREATIVE) return;
+                if(damager.getGameMode() == GameMode.SPECTATOR) return;
+
+                if (damager == TagManager.getIt()) {
+                    if (TagManager.getTaggers().contains(damaged)) {
+                        TagManager.setIt(damaged);
+                        TagUtil.sendMessageToPlayers(ChatColor.GREEN + damaged.getName() + " is it!");
+                    } else {
+                        event.setCancelled(true);
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "This user is not part of the tag game!");
+                    }
+                } else if (TagManager.getTaggers().contains(damager) && !TagManager.getTaggers().contains(damaged)) {
+                    event.setCancelled(true);
+                    TagUtil.sendTagMessage(damager, ChatColor.RED + "You can't hit this user, they are in a game of tag!");
+                } else {
+                    if (!TagManager.isGameRunning() && TagManager.getTaggers().contains(damager)) {
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "The game hasnt started yet!");
+                        return;
+                    }
+                    if (TagManager.getTaggers().contains(damager)) {
+                        TagUtil.sendTagMessage(damager, ChatColor.RED + "You're not it, you can't tag someone!");
+                    }
                 }
-                    TagUtil.sendTagMessage(damager, ChatColor.RED + "You're not it, you can't tag someone!");
-                    event.setDamage(0);
             }
         }
     }
